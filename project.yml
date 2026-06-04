@@ -40,10 +40,11 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jespr.Transcript
         PRODUCT_NAME: Transcript
-        MARKETING_VERSION: "1.0.0"
+        MARKETING_VERSION: "0.5.2"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "5.0"
         ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         DEVELOPMENT_TEAM: CA629ESX52
       configs:
         Debug:

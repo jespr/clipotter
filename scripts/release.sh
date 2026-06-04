@@ -89,8 +89,8 @@ create_dmg_file() {
 
 # --- Preflight -----------------------------------------------------------------
 
+command -v create-dmg >/dev/null || { echo "❌ create-dmg not found. brew install create-dmg"; exit 1; }
 if ! $DRY_RUN; then
-  command -v create-dmg >/dev/null || { echo "❌ create-dmg not found. brew install create-dmg"; exit 1; }
   command -v gh >/dev/null || { echo "❌ gh not found. brew install gh"; exit 1; }
   if ! xcrun notarytool history --keychain-profile "AC_PASSWORD" >/dev/null 2>&1; then
     echo "❌ notarytool keychain profile \"AC_PASSWORD\" not set up. Run:"
@@ -130,16 +130,19 @@ xcodebuild -exportArchive \
 codesign --verify --deep --strict --verbose=2 "build/export/$APP_NAME.app"
 echo "✅ Code signature verified (deep + strict)."
 
+echo "📦 Creating DMG..."
+create_dmg_file "build/$APP_NAME.dmg"
+
 if $DRY_RUN; then
-  echo "🏁 Dry run complete. Signed app at: build/export/$APP_NAME.app"
-  echo "   Note: spctl --assess will fail until notarized (expected in dry-run)."
+  echo "🏁 Dry run complete."
+  echo "   App: build/export/$APP_NAME.app"
+  echo "   DMG (signed, NOT notarized): build/$APP_NAME.dmg"
+  echo "   Gatekeeper will warn on first open — right-click the app → Open,"
+  echo "   or clear quarantine: xattr -dr com.apple.quarantine build/$APP_NAME.dmg"
   exit 0
 fi
 
 # --- Notarize + staple ---------------------------------------------------------
-
-echo "📦 Creating DMG..."
-create_dmg_file "build/$APP_NAME.dmg"
 
 echo "🔏 Notarizing..."
 xcrun notarytool submit "build/$APP_NAME.dmg" --keychain-profile "AC_PASSWORD" --wait

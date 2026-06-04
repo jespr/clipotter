@@ -6,11 +6,9 @@ notes and a card on the website changelog.
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-06-03
+## [0.5.2] - 2026-06-04
 
-- Transcribe video and audio entirely on-device — nothing is uploaded
-- Drag-and-drop a file, click to browse, or paste a URL / file path
-- Word-accurate timestamps; click a timestamp to jump to that point in the video
-- Run a prompt over the transcript with Apple's on-device model or Claude
-- Saved prompts library and a Markdown-rendered Processed view
-- Expandable video player
+- New app icon
+- Fixed a crash that could happen when a video loaded into the player
+- Focused on local files — drag a file in or click to browse (removed the URL field)
+- Use the up and down arrow keys to step through transcript segments; the video jumps to each

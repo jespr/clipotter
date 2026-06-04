@@ -6,6 +6,17 @@ enum MediaSource {
     case remote(URL)
 }
 
+enum RemoteMediaError: LocalizedError {
+    case notMedia(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .notMedia(let host):
+            return "\(host) returned a web page, not a media file. Paste a direct link to a video or audio file — pages like YouTube can't be transcribed directly (download the video first)."
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class TranscriptionModel {
@@ -84,7 +95,11 @@ final class TranscriptionModel {
     }
 
     private func download(_ url: URL) async throws -> URL {
-        let (tempURL, _) = try await URLSession.shared.download(from: url)
+        let (tempURL, response) = try await URLSession.shared.download(from: url)
+        if let mime = response.mimeType?.lowercased(), mime.hasPrefix("text/") || mime.contains("html") {
+            try? FileManager.default.removeItem(at: tempURL)
+            throw RemoteMediaError.notMedia(url.host ?? "That link")
+        }
         let ext = url.pathExtension.isEmpty ? "mp4" : url.pathExtension
         let destination = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)

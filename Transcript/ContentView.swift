@@ -12,7 +12,6 @@ struct ContentView: View {
     @State private var library = PromptLibrary()
     @State private var playback = PlaybackModel()
 
-    @State private var urlText = ""
     @State private var promptText = PromptLibrary.starters.first?.text ?? ""
     @State private var tab: Tab = .original
     @State private var isTargeted = false
@@ -25,6 +24,8 @@ struct ContentView: View {
     @State private var newPromptName = ""
     @State private var isVideoExpanded = false
     @State private var showFileImporter = false
+    @State private var selectedSegmentID: Int?
+    @FocusState private var transcriptFocused: Bool
 
     private var hasTranscript: Bool { !model.segments.isEmpty }
     private var hasMedia: Bool { model.mediaURL != nil }
@@ -57,7 +58,6 @@ struct ContentView: View {
         VStack(spacing: 16) {
             header
             dropZone
-            urlBar
 
             if hasMedia {
                 playerView(expanded: false)
@@ -89,7 +89,7 @@ struct ContentView: View {
     }
 
     private func playerView(expanded: Bool) -> some View {
-        VideoPlayer(player: playback.player)
+        PlayerView(player: playback.player)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(alignment: .topTrailing) {
                 Button {
@@ -172,21 +172,6 @@ struct ContentView: View {
                 startTranscription(.local(url))
             }
         }
-    }
-
-    // MARK: - URL bar
-
-    private var urlBar: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "link").foregroundStyle(.secondary)
-            TextField("…or paste a video URL or file path, then press Return", text: $urlText)
-                .textFieldStyle(.plain)
-                .onSubmit(submitURL)
-            Button("Transcribe", action: submitURL)
-                .disabled(urlText.trimmingCharacters(in: .whitespaces).isEmpty)
-        }
-        .padding(10)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.secondary.opacity(0.08)))
     }
 
     // MARK: - Prompt section
@@ -369,21 +354,34 @@ struct ContentView: View {
     }
 
     private var segmentList: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 2) {
-                ForEach(model.segments) { segment in
-                    segmentRow(segment)
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 2) {
+                    ForEach(model.segments) { segment in
+                        segmentRow(segment).id(segment.id)
+                    }
                 }
+                .padding(8)
             }
-            .padding(8)
+            .focusable()
+            .focusEffectDisabled()
+            .focused($transcriptFocused)
+            .onKeyPress(.downArrow) { moveSelection(1); return .handled }
+            .onKeyPress(.upArrow) { moveSelection(-1); return .handled }
+            .onChange(of: selectedSegmentID) { _, id in
+                guard let id else { return }
+                withAnimation(.easeInOut(duration: 0.15)) { proxy.scrollTo(id, anchor: .center) }
+            }
+            .onAppear { transcriptFocused = true }
         }
     }
 
     private func segmentRow(_ segment: TranscriptSegment) -> some View {
-        let current = isCurrent(segment)
+        let playing = isCurrent(segment)
+        let selected = selectedSegmentID == segment.id
         return HStack(alignment: .firstTextBaseline, spacing: 10) {
             Button {
-                playback.seek(to: segment.start)
+                select(segment)
             } label: {
                 Text(segment.timecode)
                     .font(.system(.callout, design: .monospaced))
@@ -399,8 +397,33 @@ struct ContentView: View {
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
-        .background(current ? Color.accentColor.opacity(0.14) : Color.clear)
+        .background(segmentBackground(selected: selected, playing: playing))
         .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+
+    private func segmentBackground(selected: Bool, playing: Bool) -> Color {
+        if selected { return Color.accentColor.opacity(0.28) }
+        if playing { return Color.accentColor.opacity(0.12) }
+        return Color.clear
+    }
+
+    /// Selects a segment and seeks the player to its start.
+    private func select(_ segment: TranscriptSegment) {
+        selectedSegmentID = segment.id
+        playback.seek(to: segment.start)
+    }
+
+    /// Arrow-key navigation: first press jumps to the playing/first segment,
+    /// subsequent presses step by `delta`.
+    private func moveSelection(_ delta: Int) {
+        guard !model.segments.isEmpty else { return }
+        let target: Int
+        if let id = selectedSegmentID, let index = model.segments.firstIndex(where: { $0.id == id }) {
+            target = max(0, min(model.segments.count - 1, index + delta))
+        } else {
+            target = model.segments.firstIndex(where: isCurrent) ?? 0
+        }
+        select(model.segments[target])
     }
 
     private func isCurrent(_ segment: TranscriptSegment) -> Bool {
@@ -497,24 +520,8 @@ struct ContentView: View {
     private func startTranscription(_ source: MediaSource) {
         processing.reset()
         tab = .original
+        selectedSegmentID = nil
         model.start(source)
-    }
-
-    private func submitURL() {
-        let trimmed = urlText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-
-        if let url = URL(string: trimmed),
-           let scheme = url.scheme?.lowercased(),
-           scheme == "http" || scheme == "https" {
-            startTranscription(.remote(url))
-        } else if trimmed.hasPrefix("file://"), let url = URL(string: trimmed) {
-            startTranscription(.local(url))
-        } else {
-            let expanded = (trimmed as NSString).expandingTildeInPath
-            startTranscription(.local(URL(fileURLWithPath: expanded)))
-        }
-        urlText = ""
     }
 
     private func runPrompt() {
