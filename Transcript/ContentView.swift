@@ -27,6 +27,8 @@ struct ContentView: View {
     @State private var showFileImporter = false
     @State private var selectedSegmentID: Int?
     @State private var hoveredSegmentID: Int?
+    @State private var starred: Set<Int> = []
+    @State private var starToast: String?
     @State private var statusTick = 0
     @FocusState private var transcriptFocused: Bool
 
@@ -318,6 +320,20 @@ struct ContentView: View {
 
                 Spacer()
 
+                if tab == .original && !starred.isEmpty {
+                    Menu {
+                        Button { copyStarredText() } label: { Label("Copy text", systemImage: "doc.on.doc") }
+                        Button { copyStarredImage() } label: { Label("Copy image", systemImage: "photo.on.rectangle") }
+                        Divider()
+                        Button(role: .destructive) { starred.removeAll() } label: { Label("Clear stars", systemImage: "star.slash") }
+                    } label: {
+                        Label("\(starred.count)", systemImage: "star.fill")
+                    }
+                    .fixedSize()
+                    .tint(.yellow)
+                    .help("Export starred lines")
+                }
+
                 if tab == .original && hasTranscript {
                     Button {
                         showTimestamps.toggle()
@@ -416,27 +432,33 @@ struct ContentView: View {
         let playing = isCurrent(segment)
         let selected = selectedSegmentID == segment.id
         let hovered = hoveredSegmentID == segment.id
-        return Button {
-            select(segment)
-        } label: {
+        let isStarred = starred.contains(segment.id)
+        return HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Button {
+                toggleStar(segment)
+            } label: {
+                Image(systemName: isStarred ? "star.fill" : "star")
+                    .foregroundStyle(isStarred ? .yellow : .secondary.opacity(0.45))
+            }
+            .buttonStyle(.plain)
+            .help(isStarred ? "Unstar this line" : "Star this line")
+
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(segment.timecode)
                     .font(.system(.callout, design: .monospaced))
                     .monospacedDigit()
                     .foregroundStyle(Color.accentColor)
                 Text(segment.text)
-                    .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
+            .onTapGesture { select(segment) }
+            .help("Jump to \(segment.timecode)")
         }
-        .buttonStyle(.plain)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
         .background(segmentBackground(selected: selected, playing: playing, hovered: hovered))
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        .help("Jump to \(segment.timecode)")
         .onHover { inside in
             if inside {
                 hoveredSegmentID = segment.id
@@ -457,6 +479,49 @@ struct ContentView: View {
     private func select(_ segment: TranscriptSegment) {
         selectedSegmentID = segment.id
         playback.seek(to: segment.start)
+    }
+
+    private var starredSegments: [TranscriptSegment] {
+        model.segments.filter { starred.contains($0.id) }
+    }
+
+    private func toggleStar(_ segment: TranscriptSegment) {
+        if starred.contains(segment.id) {
+            starred.remove(segment.id)
+        } else {
+            starred.insert(segment.id)
+        }
+    }
+
+    private func copyStarredText() {
+        let segments = starredSegments
+        guard !segments.isEmpty else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(StarredExport.text(for: segments), forType: .string)
+        toast("Copied starred text — ⌘V into your LLM")
+    }
+
+    private func copyStarredImage() {
+        let segments = starredSegments
+        guard !segments.isEmpty else { return }
+        toast("Capturing frames…")
+        Task {
+            if let image = await StarredExport.image(mediaURL: model.mediaURL, segments: segments) {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.writeObjects([image])
+                toast("Starred image copied — ⌘V into your LLM")
+            } else {
+                toast("Couldn't build the image")
+            }
+        }
+    }
+
+    private func toast(_ message: String) {
+        starToast = message
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            if starToast == message { starToast = nil }
+        }
     }
 
     /// Arrow-key navigation: first press jumps to the playing/first segment,
@@ -554,6 +619,7 @@ struct ContentView: View {
     }
 
     private var statusText: String {
+        if let starToast { return starToast }
         if tab == .processed {
             if processing.isProcessing { return "Thinking it over…" }
             if let error = processing.errorMessage { return error }
@@ -572,6 +638,8 @@ struct ContentView: View {
         processing.reset()
         tab = .original
         selectedSegmentID = nil
+        starred.removeAll()
+        starToast = nil
         model.start(source)
     }
 
