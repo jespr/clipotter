@@ -69,6 +69,7 @@ struct ContentView: View {
         } message: {
             Text("Save this prompt to reuse it later.")
         }
+        .tint(.orange)
     }
 
     private var normalLayout: some View {

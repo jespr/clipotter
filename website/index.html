@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Transcript — local video & audio transcription for Mac</title>
-    <meta name="description" content="Drop in a video or audio file and get an accurate transcript — transcribed entirely on your Mac. Click any timestamp to jump to that moment.">
+    <meta name="description" content="Drop in a video or audio file and get an accurate, timestamped transcript — transcribed entirely on your Mac. Click any line to jump there, ask it anything, and star moments to share with an LLM.">
 
     <link rel="icon" type="image/png" sizes="96x96" href="/transcript/favicon-96.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/transcript/favicon-32.png">
@@ -25,18 +25,18 @@
 </head>
 <body class="bg-[#0a0a0a] text-zinc-300 antialiased overflow-x-hidden">
 
-    <!-- warm glow behind the hero, matching the icon -->
     <div class="pointer-events-none absolute inset-x-0 top-0 -z-0 flex justify-center overflow-hidden">
         <div class="mt-[-6rem] h-[420px] w-[680px] rounded-full bg-orange-600/20 blur-[130px]"></div>
     </div>
 
     <nav class="relative z-20">
-        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
             <a href="/transcript/" class="flex items-center gap-2 text-white font-medium hover:opacity-80 transition-opacity">
                 <img src="/transcript/icon.png" alt="" class="size-6 rounded-[28%]">
                 Transcript
             </a>
             <div class="flex items-center gap-5 text-zinc-400">
+                <a href="#features" class="hover:text-white transition-colors">Features</a>
                 <a href="/transcript/changelog.html" class="hover:text-white transition-colors">Changelog</a>
                 <a href="https://github.com/jespr/transcript" class="hover:text-white transition-colors">GitHub</a>
             </div>
@@ -44,16 +44,18 @@
     </nav>
 
     <main class="relative z-10">
-        <section class="pt-16 pb-24 md:pt-24">
+        <!-- Hero -->
+        <section class="pt-16 pb-10 md:pt-24">
             <div class="max-w-4xl mx-auto px-6 text-center">
                 <img src="/transcript/icon.png" alt="Transcript app icon"
                      class="size-24 sm:size-28 rounded-[22%] mx-auto mb-8 shadow-2xl shadow-orange-500/20 ring-1 ring-white/10">
-                <h1 class="text-4xl sm:text-5xl font-medium tracking-tight text-white text-balance max-w-[24ch] mx-auto">
+                <h1 class="text-4xl sm:text-5xl font-medium tracking-tight text-white text-balance max-w-[22ch] mx-auto">
                     Transcribe video &amp; audio, entirely on your Mac.
                 </h1>
-                <p class="mt-6 text-lg text-zinc-400 text-pretty max-w-[48ch] mx-auto">
-                    Drop in a file or click to browse. Get an accurate transcript with word-level
-                    timestamps — click any timestamp to jump to that moment. Nothing leaves your Mac.
+                <p class="mt-6 text-lg text-zinc-400 text-pretty max-w-[50ch] mx-auto">
+                    Drop in a file and get an accurate, timestamped transcript in seconds —
+                    on-device, nothing uploaded. Click any line to jump there, ask it anything,
+                    and star the moments that matter.
                 </p>
                 <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
                     <a href="https://github.com/jespr/transcript/releases/latest/download/Transcript.dmg"
@@ -63,13 +65,98 @@
                     </a>
                     <a href="https://github.com/jespr/transcript" class="text-zinc-500 hover:text-zinc-300 transition-colors text-sm">View source</a>
                 </div>
-                <p class="mt-4 text-sm text-zinc-700">Requires macOS 26 or later · Apple silicon</p>
+                <p class="mt-4 text-sm text-zinc-700">Free &amp; open source · Requires macOS 26 or later · Apple silicon</p>
+            </div>
+        </section>
+
+        <!-- Product screenshot -->
+        <section class="pb-20">
+            <div class="max-w-5xl mx-auto px-6">
+                <img src="/transcript/screenshots/app.png" alt="Transcript app — video on the left, timestamped transcript on the right"
+                     class="w-full rounded-xl ring-1 ring-white/10 shadow-2xl shadow-black/60">
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="pb-8">
+            <div class="max-w-5xl mx-auto px-6">
+                <h2 class="text-2xl sm:text-3xl font-medium tracking-tight text-white text-center">Everything happens on your Mac.</h2>
+                <p class="mt-3 text-zinc-400 text-center max-w-[55ch] mx-auto">No accounts, no cloud, no upload. Just drop a file in.</p>
+
+                <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div class="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-6">
+                        <div class="text-2xl mb-3">🔒</div>
+                        <h3 class="text-white font-medium">Private by default</h3>
+                        <p class="mt-2 text-sm text-zinc-400">Transcribes with Apple's on-device speech models. Your media never leaves your Mac.</p>
+                    </div>
+                    <div class="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-6">
+                        <div class="text-2xl mb-3">⏱️</div>
+                        <h3 class="text-white font-medium">Timestamped, clickable</h3>
+                        <p class="mt-2 text-sm text-zinc-400">Every line is timestamped. Click a line — or press ↑/↓ — to jump the video to that exact moment.</p>
+                    </div>
+                    <div class="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-6">
+                        <div class="text-2xl mb-3">🎬</div>
+                        <h3 class="text-white font-medium">Watch &amp; read side by side</h3>
+                        <p class="mt-2 text-sm text-zinc-400">Video on the left, transcript on the right. The current line highlights as it plays.</p>
+                    </div>
+                    <div class="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-6">
+                        <div class="text-2xl mb-3">✨</div>
+                        <h3 class="text-white font-medium">Ask it anything</h3>
+                        <p class="mt-2 text-sm text-zinc-400">Run a prompt over the transcript with Apple's on-device model or Claude — summaries, action items, cleanups.</p>
+                    </div>
+                    <div class="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-6">
+                        <div class="text-2xl mb-3">⭐</div>
+                        <h3 class="text-white font-medium">Star &amp; export for LLMs</h3>
+                        <p class="mt-2 text-sm text-zinc-400">Star key moments, then copy them as text or as an image of video stills — with matching “Frame N” labels.</p>
+                    </div>
+                    <div class="rounded-xl bg-white/[0.03] ring-1 ring-white/10 p-6">
+                        <div class="text-2xl mb-3">🦦</div>
+                        <h3 class="text-white font-medium">Fast &amp; friendly</h3>
+                        <p class="mt-2 text-sm text-zinc-400">Drag in a file or click to browse. Saved prompts, Markdown results, and automatic updates built in.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI highlight -->
+        <section class="py-20">
+            <div class="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-medium tracking-tight text-white text-balance">Turn talk into answers.</h2>
+                    <p class="mt-4 text-zinc-400 text-pretty">
+                        Pick a saved prompt or write your own, choose Apple's on-device model or Claude,
+                        and get a clean Markdown result next to the original — summaries, action items,
+                        a tidy edit, whatever you need.
+                    </p>
+                    <ul class="mt-6 space-y-2 text-sm text-zinc-400">
+                        <li class="flex items-start gap-2"><span class="text-orange-400">›</span> On-device or Claude, your choice</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400">›</span> Original / Processed tabs, side by side</li>
+                        <li class="flex items-start gap-2"><span class="text-orange-400">›</span> Reusable prompt library</li>
+                    </ul>
+                </div>
+                <img src="/transcript/screenshots/ai.png" alt="Running a prompt over the transcript to get a summary"
+                     class="w-full rounded-xl ring-1 ring-white/10 shadow-2xl shadow-black/60">
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="pb-24">
+            <div class="max-w-3xl mx-auto px-6 text-center">
+                <h2 class="text-2xl sm:text-3xl font-medium tracking-tight text-white">Get the transcript. Keep the privacy.</h2>
+                <div class="mt-8">
+                    <a href="https://github.com/jespr/transcript/releases/latest/download/Transcript.dmg"
+                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-white text-zinc-950 text-sm font-medium hover:bg-zinc-200 transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 384 512" fill="currentColor"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                        Download for macOS
+                    </a>
+                </div>
+                <p class="mt-4 text-sm text-zinc-700">Free &amp; open source · Requires macOS 26 or later · Apple silicon</p>
             </div>
         </section>
     </main>
 
     <footer class="relative z-10 pb-12 pt-8 border-t border-zinc-900">
-        <div class="max-w-4xl mx-auto px-6 flex items-center justify-between gap-4 text-sm text-zinc-600">
+        <div class="max-w-5xl mx-auto px-6 flex items-center justify-between gap-4 text-sm text-zinc-600">
             <span>&copy; 2026</span>
             <div class="flex items-center gap-6">
                 <a href="https://github.com/jespr/transcript" class="hover:text-zinc-400 transition-colors">GitHub</a>
