@@ -3,6 +3,20 @@
   <channel>
     <title>Transcript</title>
     <item>
+      <title>Version 0.5.3</title>
+      <sparkle:version>0.5.3</sparkle:version>
+      <sparkle:shortVersionString>0.5.3</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <pubDate>Thu, 04 Jun 2026 15:56:33 +0000</pubDate>
+      <description><![CDATA[<ul><li>Fresh app icon — the otter got headphones and shades</li><li>A little more personality: playful status messages and empty states</li><li>New side-by-side layout — video on the left, transcript on the right</li><li>Click anywhere on a transcript line, not just the timestamp, to jump there</li><li>The drop area now fills the whole window when it's empty</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/jespr/transcript/releases/download/v0.5.3/Transcript.dmg"
+        sparkle:edSignature="9BzeCSiMIlL/GM1zu/Ejj5eVuJwHXv9sUGULwDzEGh6DTaO8RV4W2TARlrh7V+PmYwALKbWIFx/EythFCkpgAQ=="
+        length="4871673"
+        type="application/octet-stream"
+      />
+    </item>
+    <item>
       <title>Version 0.5.2</title>
       <sparkle:version>0.5.2</sparkle:version>
       <sparkle:shortVersionString>0.5.2</sparkle:shortVersionString>
