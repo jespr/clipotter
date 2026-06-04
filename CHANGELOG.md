@@ -6,6 +6,10 @@ notes and a card on the website changelog.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-06-04
+
+- Save your work to a folder — the original transcript as `transcript.txt`, the processed result as `processed.md`, and any starred moments as a `frames.png` contact sheet
+
 ## [0.5.4] - 2026-06-04
 
 - Star any transcript line (★) to bookmark a moment

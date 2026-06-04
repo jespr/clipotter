@@ -356,6 +356,14 @@ struct ContentView: View {
                     Label(copied ? "Copied" : "Copy", systemImage: copied ? "checkmark" : "doc.on.doc")
                 }
                 .disabled(activeText.isEmpty)
+
+                Button {
+                    saveBundle()
+                } label: {
+                    Label("Save", systemImage: "square.and.arrow.down")
+                }
+                .disabled(!hasTranscript && !processing.hasOutput)
+                .help("Save transcript, processed Markdown, and starred frames to a folder")
             }
 
             ZStack {
@@ -649,6 +657,43 @@ struct ContentView: View {
         Task {
             try? await Task.sleep(for: .seconds(1.5))
             copied = false
+        }
+    }
+
+    /// Pick a folder, then write the original transcript, the processed Markdown,
+    /// and (if any lines are starred) a contact sheet of those frames into it.
+    private func saveBundle() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.prompt = "Save Here"
+        panel.message = "Choose where to save the transcript and processed Markdown."
+        guard panel.runModal() == .OK, let directory = panel.url else { return }
+
+        let segments = starredSegments
+        let transcript = model.transcript
+        let processed = processing.output
+        toast("Saving…")
+        Task {
+            let image = segments.isEmpty
+                ? nil
+                : await StarredExport.image(mediaURL: model.mediaURL, segments: segments)
+            do {
+                let bundle = TranscriptExport.Bundle(
+                    transcript: transcript,
+                    processed: processed,
+                    image: image
+                )
+                let written = try TranscriptExport.write(bundle, to: directory)
+                if written.isEmpty {
+                    toast("Nothing to save yet")
+                } else {
+                    toast("Saved \(written.joined(separator: ", "))")
+                }
+            } catch {
+                toast("Couldn't save: \(error.localizedDescription)")
+            }
         }
     }
 
