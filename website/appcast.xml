@@ -3,6 +3,20 @@
   <channel>
     <title>Transcript</title>
     <item>
+      <title>Version 0.6.0</title>
+      <sparkle:version>0.6.0</sparkle:version>
+      <sparkle:shortVersionString>0.6.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <pubDate>Thu, 04 Jun 2026 18:08:19 +0000</pubDate>
+      <description><![CDATA[<ul><li>Save your work to a folder — the original transcript as `transcript.txt`, the processed result as `processed.md`, and any starred moments as a `frames.png` contact sheet</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/jespr/transcript/releases/download/v0.6.0/Transcript.dmg"
+        sparkle:edSignature="JfN7/6O/WPS0oa6l1cOZUGB+vMyyNwVgARGWeE0hmUPrgZdu8gdj4EuWKJexXk8OIXPTIM31w9hMLutPmY6XAg=="
+        length="4910443"
+        type="application/octet-stream"
+      />
+    </item>
+    <item>
       <title>Version 0.5.4</title>
       <sparkle:version>0.5.4</sparkle:version>
       <sparkle:shortVersionString>0.5.4</sparkle:shortVersionString>
