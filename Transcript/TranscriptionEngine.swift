@@ -58,7 +58,7 @@ enum TranscriptionEngine {
         mediaURL: URL,
         continuation: AsyncThrowingStream<TranscriptionEvent, Error>.Continuation
     ) async throws {
-        continuation.yield(.status("Extracting audio…"))
+        continuation.yield(.status("Fishing out the audio…"))
         let audioURL = try await extractAudio(from: mediaURL)
         defer { try? FileManager.default.removeItem(at: audioURL) }
 
@@ -75,7 +75,7 @@ enum TranscriptionEngine {
         }
 
         if await !isInstalled(locale) {
-            continuation.yield(.status("Downloading speech model (one-time)…"))
+            continuation.yield(.status("Grabbing the speech model (just this once)…"))
             if let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) {
                 try await request.downloadAndInstall()
             }
@@ -83,7 +83,7 @@ enum TranscriptionEngine {
 
         let analyzer = SpeechAnalyzer(modules: [transcriber])
 
-        continuation.yield(.status("Transcribing…"))
+        continuation.yield(.status("Listening closely…"))
 
         let resultsTask = Task {
             var segments: [TranscriptSegment] = []

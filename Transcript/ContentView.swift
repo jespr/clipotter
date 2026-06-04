@@ -2,6 +2,7 @@ import SwiftUI
 import AppKit
 import AVKit
 import UniformTypeIdentifiers
+import Combine
 
 struct ContentView: View {
     private enum Tab: Hashable { case original, processed }
@@ -25,7 +26,18 @@ struct ContentView: View {
     @State private var isVideoExpanded = false
     @State private var showFileImporter = false
     @State private var selectedSegmentID: Int?
+    @State private var hoveredSegmentID: Int?
+    @State private var statusTick = 0
     @FocusState private var transcriptFocused: Bool
+
+    /// Rotating "working" lines shown while transcribing.
+    private static let workingPhrases = [
+        "Diving in…",
+        "Listening closely…",
+        "Catching every word…",
+        "Tuning my whiskers…",
+        "Almost got it…"
+    ]
 
     private var hasTranscript: Bool { !model.segments.isEmpty }
     private var hasMedia: Bool { model.mediaURL != nil }
@@ -40,6 +52,9 @@ struct ContentView: View {
         }
         .onChange(of: model.mediaURL) { _, newValue in
             playback.load(newValue)
+        }
+        .onReceive(Timer.publish(every: 2.5, on: .main, in: .common).autoconnect()) { _ in
+            if model.isRunning { statusTick &+= 1 }
         }
         .popover(isPresented: $showSettings, arrowEdge: .top) { settingsPopover }
         .alert("Save prompt", isPresented: $showSavePrompt) {
@@ -57,25 +72,46 @@ struct ContentView: View {
     private var normalLayout: some View {
         VStack(spacing: 16) {
             header
-            dropZone
 
             if hasMedia {
-                playerView(expanded: false)
-                    .frame(height: 220)
+                HStack(alignment: .top, spacing: 16) {
+                    mediaColumn
+                    transcriptColumn
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                dropZone
+                if let error = model.errorMessage {
+                    banner(error, color: .red, icon: "exclamationmark.triangle.fill")
+                }
             }
+        }
+        .padding(20)
+        .frame(minWidth: 1000, minHeight: 620)
+    }
 
+    /// Left side: drop target + video player.
+    private var mediaColumn: some View {
+        VStack(spacing: 12) {
+            dropZone
+            playerView(expanded: false)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             if let error = model.errorMessage {
                 banner(error, color: .red, icon: "exclamationmark.triangle.fill")
             }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
 
+    /// Right side: prompt + transcript/processed output.
+    private var transcriptColumn: some View {
+        VStack(spacing: 12) {
             if hasTranscript {
                 promptSection
             }
-
             outputSection
         }
-        .padding(20)
-        .frame(minWidth: 720, minHeight: 780)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var expandedLayout: some View {
@@ -136,7 +172,7 @@ struct ContentView: View {
                         .fill(isTargeted ? Color.accentColor.opacity(0.08) : Color.secondary.opacity(0.05))
                 )
             if hasMedia {
-                Label("Drop another file, or click to browse", systemImage: "arrow.down.doc")
+                Label(isTargeted ? "Yes! Drop it 🦦" : "Toss me another file 🦦", systemImage: "arrow.down.doc")
                     .font(.callout)
                     .foregroundStyle(isTargeted ? Color.accentColor : .secondary)
             } else {
@@ -144,16 +180,16 @@ struct ContentView: View {
                     Image(systemName: "arrow.down.doc.fill")
                         .font(.system(size: 30))
                         .foregroundStyle(isTargeted ? Color.accentColor : .secondary)
-                    Text("Drop a file here, or click to browse")
+                    Text(isTargeted ? "Yes! Drop it 🦦" : "Feed me a file and I'll dive in 🦦")
                         .font(.headline)
-                    Text("Transcribed locally on your Mac — nothing is uploaded")
+                    Text("Drop a video or audio file, or click to browse — it all stays on your Mac.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .padding()
             }
         }
-        .frame(height: hasMedia ? 56 : 120)
+        .frame(maxWidth: .infinity, minHeight: hasMedia ? 56 : 0, maxHeight: hasMedia ? 56 : .infinity)
         .contentShape(RoundedRectangle(cornerRadius: 14))
         .animation(.default, value: hasMedia)
         .onTapGesture { showFileImporter = true }
@@ -324,7 +360,7 @@ struct ContentView: View {
     private var contentArea: some View {
         if tab == .original {
             if model.segments.isEmpty {
-                placeholderText(model.isRunning ? "Transcribing…" : "The transcript will appear here.")
+                placeholderText(model.isRunning ? "" : "Nothing here yet — toss me a file.")
             } else if showTimestamps {
                 segmentList
             } else {
@@ -348,7 +384,7 @@ struct ContentView: View {
         } else {
             placeholderText(
                 processing.isProcessing ? "" :
-                    (hasTranscript ? "Run a prompt to see the processed result here." : "")
+                    (hasTranscript ? "Pick a prompt, hit Run, and I'll rework it here." : "")
             )
         }
     }
@@ -379,31 +415,41 @@ struct ContentView: View {
     private func segmentRow(_ segment: TranscriptSegment) -> some View {
         let playing = isCurrent(segment)
         let selected = selectedSegmentID == segment.id
-        return HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Button {
-                select(segment)
-            } label: {
+        let hovered = hoveredSegmentID == segment.id
+        return Button {
+            select(segment)
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(segment.timecode)
                     .font(.system(.callout, design: .monospaced))
                     .monospacedDigit()
+                    .foregroundStyle(Color.accentColor)
+                Text(segment.text)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(Color.accentColor)
-            .help("Jump to \(segment.timecode)")
-
-            Text(segment.text)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
         }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-        .background(segmentBackground(selected: selected, playing: playing))
+        .buttonStyle(.plain)
+        .background(segmentBackground(selected: selected, playing: playing, hovered: hovered))
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        .help("Jump to \(segment.timecode)")
+        .onHover { inside in
+            if inside {
+                hoveredSegmentID = segment.id
+            } else if hoveredSegmentID == segment.id {
+                hoveredSegmentID = nil
+            }
+        }
     }
 
-    private func segmentBackground(selected: Bool, playing: Bool) -> Color {
+    private func segmentBackground(selected: Bool, playing: Bool, hovered: Bool) -> Color {
         if selected { return Color.accentColor.opacity(0.28) }
         if playing { return Color.accentColor.opacity(0.12) }
+        if hovered { return Color.secondary.opacity(0.12) }
         return Color.clear
     }
 
@@ -509,8 +555,13 @@ struct ContentView: View {
 
     private var statusText: String {
         if tab == .processed {
-            if processing.isProcessing { return "Running prompt…" }
+            if processing.isProcessing { return "Thinking it over…" }
             if let error = processing.errorMessage { return error }
+        }
+        if model.isRunning {
+            // Keep the (rare) one-time model-download message visible; otherwise rotate.
+            if model.status.localizedCaseInsensitiveContains("model") { return model.status }
+            return Self.workingPhrases[statusTick % Self.workingPhrases.count]
         }
         return model.status
     }

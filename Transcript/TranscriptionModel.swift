@@ -84,9 +84,9 @@ final class TranscriptionModel {
                     segments = newSegments
                 }
             }
-            status = segments.isEmpty ? "No speech found in that file." : "Done"
+            status = segments.isEmpty ? "Hmm — I didn't catch any speech in there." : "Caught every word. 🦦"
         } catch is CancellationError {
-            status = "Cancelled"
+            status = "Okay, stopped."
         } catch {
             errorMessage = error.localizedDescription
             status = ""

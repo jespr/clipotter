@@ -6,6 +6,14 @@ notes and a card on the website changelog.
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-06-04
+
+- Fresh app icon — the otter got headphones and shades
+- A little more personality: playful status messages and empty states
+- New side-by-side layout — video on the left, transcript on the right
+- Click anywhere on a transcript line, not just the timestamp, to jump there
+- The drop area now fills the whole window when it's empty
+
 ## [0.5.2] - 2026-06-04
 
 - New app icon

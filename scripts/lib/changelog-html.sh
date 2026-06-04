@@ -83,13 +83,16 @@ $items                    </ul>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Changelog — Transcript</title>
     <meta name="description" content="Release notes for Transcript — local, on-device video & audio transcription for Mac.">
+    <link rel="icon" type="image/png" sizes="96x96" href="/transcript/favicon-96.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/transcript/favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/transcript/apple-touch-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>html { scroll-behavior: smooth; }</style>
 </head>
 <body class="bg-[#0a0a0a] text-zinc-300 antialiased">
     <nav class="relative z-20">
         <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
-            <a href="/transcript/" class="text-white font-medium hover:opacity-80 transition-opacity">Transcript</a>
+            <a href="/transcript/" class="flex items-center gap-2 text-white font-medium hover:opacity-80 transition-opacity"><img src="/transcript/icon.png" alt="" class="size-6 rounded-[28%]">Transcript</a>
             <div class="flex items-center gap-5 text-zinc-400">
                 <a href="/transcript/changelog.html" class="text-white" aria-current="page">Changelog</a>
                 <a href="https://github.com/jespr/transcript" class="hover:text-white transition-colors">GitHub</a>
