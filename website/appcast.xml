@@ -3,6 +3,20 @@
   <channel>
     <title>Transcript</title>
     <item>
+      <title>Version 0.5.1</title>
+      <sparkle:version>0.5.1</sparkle:version>
+      <sparkle:shortVersionString>0.5.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <pubDate>Thu, 04 Jun 2026 00:59:46 +0000</pubDate>
+
+      <enclosure
+        url="https://github.com/jespr/transcript/releases/download/v0.5.1/Transcript.dmg"
+        sparkle:edSignature="0KNHPuRj2V43RQY526gwoMty4YIr9t22Qp7oP/sqIdd63ZflibKaX3/icOU0xTI0UPh1fWb7ZPutEo1A00keCw=="
+        length="3656931"
+        type="application/octet-stream"
+      />
+    </item>
+    <item>
       <title>Version 0.5.0</title>
       <sparkle:version>0.5.0</sparkle:version>
       <sparkle:shortVersionString>0.5.0</sparkle:shortVersionString>
@@ -16,6 +30,5 @@
         type="application/octet-stream"
       />
     </item>
-
   </channel>
 </rss>
