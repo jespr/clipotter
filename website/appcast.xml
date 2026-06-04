@@ -3,6 +3,20 @@
   <channel>
     <title>Transcript</title>
     <item>
+      <title>Version 0.5.2</title>
+      <sparkle:version>0.5.2</sparkle:version>
+      <sparkle:shortVersionString>0.5.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <pubDate>Thu, 04 Jun 2026 04:35:53 +0000</pubDate>
+      <description><![CDATA[<ul><li>New app icon</li><li>Fixed a crash that could happen when a video loaded into the player</li><li>Focused on local files — drag a file in or click to browse (removed the URL field)</li><li>Use the up and down arrow keys to step through transcript segments; the video jumps to each</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/jespr/transcript/releases/download/v0.5.2/Transcript.dmg"
+        sparkle:edSignature="xgXz/tTYpj5wkuE9QNtshP7KPv+DB+Iv+9rGaCHaX4XrzTnZ+4P+M/sDcyub5lOClc6d1IUFrzqeq4ENRmSEBA=="
+        length="4405628"
+        type="application/octet-stream"
+      />
+    </item>
+    <item>
       <title>Version 0.5.1</title>
       <sparkle:version>0.5.1</sparkle:version>
       <sparkle:shortVersionString>0.5.1</sparkle:shortVersionString>
