@@ -151,6 +151,12 @@ struct ContentView: View {
 
     private var header: some View {
         HStack {
+            if let appIcon = NSApp.applicationIconImage {
+                Image(nsImage: appIcon)
+                    .resizable()
+                    .frame(width: 22, height: 22)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+            }
             Text("Transcript")
                 .font(.title2.weight(.semibold))
             Spacer()
@@ -169,20 +175,20 @@ struct ContentView: View {
         ZStack {
             RoundedRectangle(cornerRadius: 14)
                 .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8]))
-                .foregroundStyle(isTargeted ? Color.accentColor : Color.secondary.opacity(0.4))
+                .foregroundStyle(isTargeted ? Color.orange : Color.secondary.opacity(0.4))
                 .background(
                     RoundedRectangle(cornerRadius: 14)
-                        .fill(isTargeted ? Color.accentColor.opacity(0.08) : Color.secondary.opacity(0.05))
+                        .fill(isTargeted ? Color.orange.opacity(0.08) : Color.secondary.opacity(0.05))
                 )
             if hasMedia {
                 Label(isTargeted ? "Yes! Drop it 🦦" : "Toss me another file 🦦", systemImage: "arrow.down.doc")
                     .font(.callout)
-                    .foregroundStyle(isTargeted ? Color.accentColor : .secondary)
+                    .foregroundStyle(isTargeted ? Color.orange : .secondary)
             } else {
                 VStack(spacing: 8) {
                     Image(systemName: "arrow.down.doc.fill")
                         .font(.system(size: 30))
-                        .foregroundStyle(isTargeted ? Color.accentColor : .secondary)
+                        .foregroundStyle(isTargeted ? Color.orange : .secondary)
                     Text(isTargeted ? "Yes! Drop it 🦦" : "Feed me a file and I'll dive in 🦦")
                         .font(.headline)
                     Text("Drop a video or audio file, or click to browse — it all stays on your Mac.")
@@ -253,14 +259,7 @@ struct ContentView: View {
                 .background(RoundedRectangle(cornerRadius: 8).fill(Color.secondary.opacity(0.06)))
 
             HStack {
-                Picker("", selection: $settings.backend) {
-                    ForEach(LLMBackendKind.allCases) { kind in
-                        Text(kind.label).tag(kind)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .fixedSize()
-                .labelsHidden()
+                SegmentedPills(selection: $settings.backend, options: LLMBackendKind.allCases.map { ($0.label, $0) })
 
                 if backendHint != nil {
                     Button {
@@ -302,13 +301,7 @@ struct ContentView: View {
         VStack(spacing: 8) {
             HStack {
                 if hasTranscript {
-                    Picker("", selection: $tab) {
-                        Text("Original").tag(Tab.original)
-                        Text("Processed").tag(Tab.processed)
-                    }
-                    .pickerStyle(.segmented)
-                    .fixedSize()
-                    .labelsHidden()
+                    SegmentedPills(selection: $tab, options: [("Original", Tab.original), ("Processed", Tab.processed)])
                 }
 
                 if model.isRunning {
@@ -448,7 +441,7 @@ struct ContentView: View {
                 Text(segment.timecode)
                     .font(.system(.callout, design: .monospaced))
                     .monospacedDigit()
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(Color.orange)
                 Text(segment.text)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -470,8 +463,8 @@ struct ContentView: View {
     }
 
     private func segmentBackground(selected: Bool, playing: Bool, hovered: Bool) -> Color {
-        if selected { return Color.accentColor.opacity(0.28) }
-        if playing { return Color.accentColor.opacity(0.12) }
+        if selected { return Color.orange.opacity(0.28) }
+        if playing { return Color.orange.opacity(0.12) }
         if hovered { return Color.secondary.opacity(0.12) }
         return Color.clear
     }
@@ -563,13 +556,7 @@ struct ContentView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Backend").font(.subheadline.weight(.medium))
-                Picker("", selection: $settings.backend) {
-                    ForEach(LLMBackendKind.allCases) { kind in
-                        Text(kind.label).tag(kind)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                SegmentedPills(selection: $settings.backend, options: LLMBackendKind.allCases.map { ($0.label, $0) })
                 Text(AppleModel.isAvailable
                      ? "On-device runs fully locally via Apple Intelligence."
                      : (AppleModel.unavailableReason ?? ""))
@@ -670,5 +657,30 @@ struct ContentView: View {
             .foregroundStyle(color)
             .font(.callout)
             .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// Compact orange-pill segmented control — the branded look used across the app and website.
+struct SegmentedPills<Value: Hashable>: View {
+    @Binding var selection: Value
+    let options: [(String, Value)]
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(Array(options.enumerated()), id: \.offset) { _, option in
+                let selected = selection == option.1
+                Text(option.0)
+                    .font(.callout)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .foregroundStyle(selected ? Color.white : Color.secondary)
+                    .background(selected ? Color.orange : Color.clear)
+                    .contentShape(Rectangle())
+                    .onTapGesture { selection = option.1 }
+            }
+        }
+        .background(Color.secondary.opacity(0.15))
+        .clipShape(RoundedRectangle(cornerRadius: 7))
+        .fixedSize()
     }
 }
