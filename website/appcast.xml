@@ -1,7 +1,21 @@
 <?xml version="1.0" standalone="yes"?>
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
   <channel>
-    <title>Transcript</title>
+    <title>ClipOtter</title>
+    <item>
+      <title>Version 0.7.0</title>
+      <sparkle:version>0.7.0</sparkle:version>
+      <sparkle:shortVersionString>0.7.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <pubDate>Sun, 07 Jun 2026 23:01:42 +0000</pubDate>
+      <description><![CDATA[<ul><li>Renamed the app to ClipOtter 🦦</li><li>Search your transcript — find any line and jump straight to that moment in the video</li><li>Save and restore sessions — come back to a transcript with its stars and processed output intact</li><li>Added website and X links to the About window</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/jespr/clipotter/releases/download/v0.7.0/ClipOtter.dmg"
+        sparkle:edSignature="l+NqhuIUGVskPxv477Wi8S5M8EjBeObVGYg12Rv4PsP0uAcRBwWMXIuy187EzNcRvFK9yZHKi/7RxIcaAFFFDA=="
+        length="5016270"
+        type="application/octet-stream"
+      />
+    </item>
     <item>
       <title>Version 0.6.0</title>
       <sparkle:version>0.6.0</sparkle:version>
@@ -10,7 +24,7 @@
       <pubDate>Thu, 04 Jun 2026 18:08:19 +0000</pubDate>
       <description><![CDATA[<ul><li>Save your work to a folder — the original transcript as `transcript.txt`, the processed result as `processed.md`, and any starred moments as a `frames.png` contact sheet</li></ul>]]></description>
       <enclosure
-        url="https://github.com/jespr/transcript/releases/download/v0.6.0/Transcript.dmg"
+        url="https://github.com/jespr/clipotter/releases/download/v0.6.0/Transcript.dmg"
         sparkle:edSignature="JfN7/6O/WPS0oa6l1cOZUGB+vMyyNwVgARGWeE0hmUPrgZdu8gdj4EuWKJexXk8OIXPTIM31w9hMLutPmY6XAg=="
         length="4910443"
         type="application/octet-stream"
@@ -24,7 +38,7 @@
       <pubDate>Thu, 04 Jun 2026 16:09:55 +0000</pubDate>
       <description><![CDATA[<ul><li>Star any transcript line (★) to bookmark a moment</li><li>Copy starred lines as text, each tagged with a `[Frame N · mm:ss]` reference</li><li>Export starred moments as an image — a card per moment with the video still, timecode, and text — straight to the clipboard</li><li>The text tags and the image's "Frame N" labels match, so an LLM can tie each line to its still</li></ul>]]></description>
       <enclosure
-        url="https://github.com/jespr/transcript/releases/download/v0.5.4/Transcript.dmg"
+        url="https://github.com/jespr/clipotter/releases/download/v0.5.4/Transcript.dmg"
         sparkle:edSignature="MWJpvrukT57kEU9NctV+wmqadTXNb839JadEizLc/NHPfMmv9F/znOi+u1UQN6uwgJx8LOYdLyJOSlK+8DdgDg=="
         length="4890728"
         type="application/octet-stream"
@@ -38,7 +52,7 @@
       <pubDate>Thu, 04 Jun 2026 15:56:33 +0000</pubDate>
       <description><![CDATA[<ul><li>Fresh app icon — the otter got headphones and shades</li><li>A little more personality: playful status messages and empty states</li><li>New side-by-side layout — video on the left, transcript on the right</li><li>Click anywhere on a transcript line, not just the timestamp, to jump there</li><li>The drop area now fills the whole window when it's empty</li></ul>]]></description>
       <enclosure
-        url="https://github.com/jespr/transcript/releases/download/v0.5.3/Transcript.dmg"
+        url="https://github.com/jespr/clipotter/releases/download/v0.5.3/Transcript.dmg"
         sparkle:edSignature="9BzeCSiMIlL/GM1zu/Ejj5eVuJwHXv9sUGULwDzEGh6DTaO8RV4W2TARlrh7V+PmYwALKbWIFx/EythFCkpgAQ=="
         length="4871673"
         type="application/octet-stream"
@@ -52,7 +66,7 @@
       <pubDate>Thu, 04 Jun 2026 04:35:53 +0000</pubDate>
       <description><![CDATA[<ul><li>New app icon</li><li>Fixed a crash that could happen when a video loaded into the player</li><li>Focused on local files — drag a file in or click to browse (removed the URL field)</li><li>Use the up and down arrow keys to step through transcript segments; the video jumps to each</li></ul>]]></description>
       <enclosure
-        url="https://github.com/jespr/transcript/releases/download/v0.5.2/Transcript.dmg"
+        url="https://github.com/jespr/clipotter/releases/download/v0.5.2/Transcript.dmg"
         sparkle:edSignature="xgXz/tTYpj5wkuE9QNtshP7KPv+DB+Iv+9rGaCHaX4XrzTnZ+4P+M/sDcyub5lOClc6d1IUFrzqeq4ENRmSEBA=="
         length="4405628"
         type="application/octet-stream"
@@ -66,7 +80,7 @@
       <pubDate>Thu, 04 Jun 2026 00:59:46 +0000</pubDate>
 
       <enclosure
-        url="https://github.com/jespr/transcript/releases/download/v0.5.1/Transcript.dmg"
+        url="https://github.com/jespr/clipotter/releases/download/v0.5.1/Transcript.dmg"
         sparkle:edSignature="0KNHPuRj2V43RQY526gwoMty4YIr9t22Qp7oP/sqIdd63ZflibKaX3/icOU0xTI0UPh1fWb7ZPutEo1A00keCw=="
         length="3656931"
         type="application/octet-stream"
@@ -80,7 +94,7 @@
       <pubDate>Thu, 04 Jun 2026 00:53:22 +0000</pubDate>
 
       <enclosure
-        url="https://github.com/jespr/transcript/releases/download/v0.5.0/Transcript.dmg"
+        url="https://github.com/jespr/clipotter/releases/download/v0.5.0/Transcript.dmg"
         sparkle:edSignature="ubWQ+E73/T4PPBjn2Bmnec+liiOmNjknnqjqhaJfOgXUwoxPZe7X35NY98lo90+u3uu6eFwTDzEOmnEvsr3LDQ=="
         length="1280906"
         type="application/octet-stream"
