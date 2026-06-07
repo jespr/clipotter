@@ -1,4 +1,4 @@
-# Releasing Transcript
+# Releasing ClipOtter
 
 Direct distribution with auto-updates via [Sparkle]. GitHub Releases host the
 `.dmg`; GitHub Pages hosts the Sparkle appcast + landing page.
@@ -7,11 +7,12 @@ Direct distribution with auto-updates via [Sparkle]. GitHub Releases host the
 
 1. **Create the GitHub repo** (the release script tags, pushes, and creates releases):
    ```sh
-   gh repo create jespr/transcript --source . --public --push
+   gh repo create jespr/clipotter --source . --public --push
    ```
 2. **Enable GitHub Pages**: repo Settings → Pages → Source = **GitHub Actions**.
    The `Deploy website` workflow publishes `website/` to
-   `https://jespr.github.io/transcript/` (this is the `SUFeedURL` baked into the app).
+   `https://clipotter.app/` (this is the `SUFeedURL` baked into the app). The
+   custom domain is set via `website/CNAME`.
 3. **Notarization credentials** (needs an [app-specific password]):
    ```sh
    xcrun notarytool store-credentials "AC_PASSWORD" \

@@ -3,7 +3,9 @@ import Security
 
 /// Minimal generic-password Keychain wrapper for storing the Claude API key.
 enum Keychain {
-    private static let service = "com.jespr.Transcript"
+    private static let service = "com.jespr.ClipOtter"
+    /// Pre-rename service ID. Read once and migrated forward (see `get`).
+    private static let legacyService = "com.jespr.Transcript"
 
     static func set(_ value: String, for account: String) {
         let base: [String: Any] = [
@@ -20,6 +22,16 @@ enum Keychain {
     }
 
     static func get(_ account: String) -> String? {
+        if let value = read(account, from: service) { return value }
+        // Migrate a value stored under the pre-rename service ID, then forget the old copy.
+        if let legacy = read(account, from: legacyService) {
+            set(legacy, for: account)
+            return legacy
+        }
+        return nil
+    }
+
+    private static func read(_ account: String, from service: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,

@@ -15,9 +15,9 @@ set -euo pipefail
 #   xcrun notarytool store-credentials "AC_PASSWORD" \
 #     --apple-id "<APPLE_ID>" --team-id "<APPLE_TEAM_ID>" --password "<app-specific-password>"
 
-APP_NAME="Transcript"
-BUNDLE_ID="com.jespr.Transcript"
-GITHUB_REPO="jespr/transcript"          # used for release asset + appcast enclosure URLs
+APP_NAME="ClipOtter"
+BUNDLE_ID="com.jespr.ClipOtter"
+GITHUB_REPO="jespr/clipotter"          # used for release asset + appcast enclosure URLs
 MIN_SYSTEM_VERSION="26.0"               # macOS required to run; appears in appcast
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

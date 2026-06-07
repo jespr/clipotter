@@ -1,4 +1,4 @@
-name: Transcript
+name: ClipOtter
 options:
   bundleIdPrefix: com.jespr
   deploymentTarget:
@@ -11,18 +11,18 @@ packages:
     from: "2.6.0"
 
 targets:
-  Transcript:
+  ClipOtter:
     type: application
     platform: macOS
     sources:
-      - path: Transcript
+      - path: ClipOtter
     dependencies:
       - package: Sparkle
     info:
-      path: Transcript/Info.plist
+      path: ClipOtter/Info.plist
       properties:
-        CFBundleName: Transcript
-        CFBundleDisplayName: Transcript
+        CFBundleName: ClipOtter
+        CFBundleDisplayName: ClipOtter
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundlePackageType: APPL
@@ -30,16 +30,16 @@ targets:
         LSApplicationCategoryType: public.app-category.productivity
         NSHumanReadableCopyright: ""
         NSHighResolutionCapable: true
-        NSSpeechRecognitionUsageDescription: "Transcript uses on-device speech recognition to transcribe your media files locally. Nothing is sent off your Mac."
+        NSSpeechRecognitionUsageDescription: "ClipOtter uses on-device speech recognition to transcribe your media files locally. Nothing is sent off your Mac."
         # Sparkle auto-update — see scripts/release.sh
-        SUFeedURL: https://jespr.github.io/transcript/appcast.xml
+        SUFeedURL: https://clipotter.app/appcast.xml
         SUPublicEDKey: WrE6/SekNiS/4wlHuPXo9gKANTiMxV1hvOA4fArJC8M=
         SUEnableAutomaticChecks: true
         SUScheduledCheckInterval: 86400
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jespr.Transcript
-        PRODUCT_NAME: Transcript
+        PRODUCT_BUNDLE_IDENTIFIER: com.jespr.ClipOtter
+        PRODUCT_NAME: ClipOtter
         MARKETING_VERSION: "0.6.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "5.0"
