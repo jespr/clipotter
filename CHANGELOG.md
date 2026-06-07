@@ -1,10 +1,17 @@
 # Changelog
 
-All notable changes to Transcript are documented here. The release script reads
+All notable changes to ClipOtter are documented here. The release script reads
 this file: each `## [x.y.z] - YYYY-MM-DD` section becomes the Sparkle release
 notes and a card on the website changelog.
 
 ## [Unreleased]
+
+## [0.7.0] - 2026-06-07
+
+- Renamed the app to ClipOtter 🦦
+- Search your transcript — find any line and jump straight to that moment in the video
+- Save and restore sessions — come back to a transcript with its stars and processed output intact
+- Added website and X links to the About window
 
 ## [0.6.0] - 2026-06-04
 
