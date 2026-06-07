@@ -3,7 +3,7 @@ import AVFoundation
 import Speech
 
 /// One recognized chunk of speech with the audio time it starts at.
-struct TranscriptSegment: Sendable, Identifiable, Hashable {
+struct TranscriptSegment: Sendable, Identifiable, Hashable, Codable {
     let id: Int
     let start: TimeInterval
     let timecode: String

@@ -12,15 +12,18 @@ struct ContentView: View {
     @State private var settings = AppSettings()
     @State private var library = PromptLibrary()
     @State private var playback = PlaybackModel()
+    @State private var sessions = SessionStore()
 
     @State private var promptText = PromptLibrary.starters.first?.text ?? ""
     @State private var tab: Tab = .original
     @State private var isTargeted = false
     @State private var copied = false
+    @State private var sessionSaved = false
     @State private var showRawProcessed = false
     @State private var showTimestamps = true
 
     @State private var showSettings = false
+    @State private var showSessions = false
     @State private var showSavePrompt = false
     @State private var newPromptName = ""
     @State private var isVideoExpanded = false
@@ -28,9 +31,18 @@ struct ContentView: View {
     @State private var selectedSegmentID: Int?
     @State private var hoveredSegmentID: Int?
     @State private var starred: Set<Int> = []
+    /// Signature of the last saved/loaded state; compared against `currentSignature`
+    /// to know whether there are unsaved changes. `nil` means never saved this session.
+    @State private var savedSignature: Int?
     @State private var starToast: String?
     @State private var statusTick = 0
+    @State private var searchText = ""
+    /// Debounced copy of `searchText` that actually drives filtering/highlighting,
+    /// so typing stays smooth instead of re-filtering on every keystroke.
+    @State private var searchQuery = ""
+    @State private var searchDebounce: Task<Void, Never>?
     @FocusState private var transcriptFocused: Bool
+    @FocusState private var searchFocused: Bool
 
     /// Rotating "working" lines shown while transcribing.
     private static let workingPhrases = [
@@ -52,11 +64,18 @@ struct ContentView: View {
                 normalLayout
             }
         }
+        .background(WindowCloseGuard(
+            hasUnsavedChanges: { hasTranscript && savedSignature != currentSignature },
+            onSave: { saveSession() }
+        ))
         .onChange(of: model.mediaURL) { _, newValue in
             playback.load(newValue)
         }
         .onReceive(Timer.publish(every: 2.5, on: .main, in: .common).autoconnect()) { _ in
             if model.isRunning { statusTick &+= 1 }
+        }
+        .sheet(isPresented: $showSessions) {
+            SessionsSheet(store: sessions, onLoad: loadSession)
         }
         .popover(isPresented: $showSettings, arrowEdge: .top) { settingsPopover }
         .alert("Save prompt", isPresented: $showSavePrompt) {
@@ -160,6 +179,21 @@ struct ContentView: View {
             Text("Transcript")
                 .font(.title2.weight(.semibold))
             Spacer()
+            if hasTranscript {
+                Button {
+                    saveSession()
+                } label: {
+                    Label(sessionSaved ? "Saved" : "Save session",
+                          systemImage: sessionSaved ? "checkmark" : "bookmark")
+                }
+                .help("Save session — restore transcript, stars, and processed output later")
+            }
+            Button {
+                showSessions = true
+            } label: {
+                Image(systemName: "clock.arrow.circlepath")
+            }
+            .help("Saved sessions")
             Button {
                 showSettings = true
             } label: {
@@ -350,6 +384,14 @@ struct ContentView: View {
                 if model.isRunning {
                     Button("Cancel", role: .cancel) { model.cancel() }
                 }
+                if processing.hasOutput && hasTranscript {
+                    Button {
+                        copyProcessedAndOriginal()
+                    } label: {
+                        Label("Copy both", systemImage: "doc.on.doc.fill")
+                    }
+                    .help("Copy processed result followed by the original transcript")
+                }
                 Button {
                     copyActiveText()
                 } label: {
@@ -366,12 +408,57 @@ struct ContentView: View {
                 .help("Save transcript, processed Markdown, and starred frames to a folder")
             }
 
+            if tab == .original && hasTranscript {
+                searchBar
+            }
+
             ZStack {
                 RoundedRectangle(cornerRadius: 10).fill(Color.secondary.opacity(0.06))
                 contentArea
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .background {
+            // ⌘F focuses the transcript search field.
+            Button("") { if tab == .original && hasTranscript { searchFocused = true } }
+                .keyboardShortcut("f", modifiers: .command)
+                .hidden()
+        }
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search transcript", text: $searchText)
+                .textFieldStyle(.plain)
+                .focused($searchFocused)
+                .onSubmit { searchFocused = false }
+                .onChange(of: searchText) { _, newValue in
+                    searchDebounce?.cancel()
+                    searchDebounce = Task {
+                        try? await Task.sleep(for: .milliseconds(200))
+                        guard !Task.isCancelled else { return }
+                        searchQuery = newValue
+                    }
+                }
+            if !searchText.trimmingCharacters(in: .whitespaces).isEmpty {
+                Text("\(visibleSegments.count) line\(visibleSegments.count == 1 ? "" : "s")")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button {
+                    clearSearch()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Clear search")
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Capsule().fill(Color.secondary.opacity(0.1)))
     }
 
     @ViewBuilder
@@ -379,6 +466,12 @@ struct ContentView: View {
         if tab == .original {
             if model.segments.isEmpty {
                 placeholderText(model.isRunning ? "" : "Nothing here yet — toss me a file.")
+            } else if !trimmedSearch.isEmpty {
+                if visibleSegments.isEmpty {
+                    placeholderText("No lines match “\(trimmedSearch)”.")
+                } else {
+                    segmentList
+                }
             } else if showTimestamps {
                 segmentList
             } else {
@@ -411,7 +504,7 @@ struct ContentView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 2) {
-                    ForEach(model.segments) { segment in
+                    ForEach(visibleSegments) { segment in
                         segmentRow(segment).id(segment.id)
                     }
                 }
@@ -426,7 +519,7 @@ struct ContentView: View {
                 guard let id else { return }
                 withAnimation(.easeInOut(duration: 0.15)) { proxy.scrollTo(id, anchor: .center) }
             }
-            .onAppear { transcriptFocused = true }
+            .onAppear { if !searchFocused { transcriptFocused = true } }
         }
     }
 
@@ -450,7 +543,7 @@ struct ContentView: View {
                     .font(.system(.callout, design: .monospaced))
                     .monospacedDigit()
                     .foregroundStyle(Color.orange)
-                Text(segment.text)
+                Text(highlighted(segment.text))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .contentShape(Rectangle())
@@ -529,14 +622,50 @@ struct ContentView: View {
     /// Arrow-key navigation: first press jumps to the playing/first segment,
     /// subsequent presses step by `delta`.
     private func moveSelection(_ delta: Int) {
-        guard !model.segments.isEmpty else { return }
+        let segments = visibleSegments
+        guard !segments.isEmpty else { return }
         let target: Int
-        if let id = selectedSegmentID, let index = model.segments.firstIndex(where: { $0.id == id }) {
-            target = max(0, min(model.segments.count - 1, index + delta))
+        if let id = selectedSegmentID, let index = segments.firstIndex(where: { $0.id == id }) {
+            target = max(0, min(segments.count - 1, index + delta))
         } else {
-            target = model.segments.firstIndex(where: isCurrent) ?? 0
+            target = segments.firstIndex(where: isCurrent) ?? 0
         }
-        select(model.segments[target])
+        select(segments[target])
+    }
+
+    /// Debounced search query with surrounding whitespace trimmed.
+    private var trimmedSearch: String {
+        searchQuery.trimmingCharacters(in: .whitespaces)
+    }
+
+    private func clearSearch() {
+        searchDebounce?.cancel()
+        searchText = ""
+        searchQuery = ""
+        searchFocused = false
+    }
+
+    /// Segments shown in the list — all of them, or only those matching the search.
+    private var visibleSegments: [TranscriptSegment] {
+        let query = trimmedSearch
+        guard !query.isEmpty else { return model.segments }
+        return model.segments.filter { $0.text.localizedCaseInsensitiveContains(query) }
+    }
+
+    /// A segment's text with every case-insensitive match of the search query highlighted.
+    private func highlighted(_ text: String) -> AttributedString {
+        var attributed = AttributedString(text)
+        let query = trimmedSearch
+        guard !query.isEmpty else { return attributed }
+        var searchStart = text.startIndex
+        while let range = text.range(of: query, options: .caseInsensitive, range: searchStart..<text.endIndex) {
+            if let attrRange = Range(range, in: attributed) {
+                attributed[attrRange].backgroundColor = .yellow.opacity(0.45)
+                attributed[attrRange].foregroundColor = .primary
+            }
+            searchStart = range.upperBound
+        }
+        return attributed
     }
 
     private func isCurrent(_ segment: TranscriptSegment) -> Bool {
@@ -591,6 +720,17 @@ struct ContentView: View {
 
     // MARK: - Derived state
 
+    /// Hash of everything a saved session captures. Compared against `savedSignature`
+    /// to detect unsaved changes. (Hasher is seeded per app run — fine for in-run compares.)
+    private var currentSignature: Int {
+        var hasher = Hasher()
+        hasher.combine(model.segments)
+        hasher.combine(starred)
+        hasher.combine(processing.output)
+        hasher.combine(promptText)
+        return hasher.finalize()
+    }
+
     private var canRun: Bool {
         hasTranscript
         && !processing.isProcessing
@@ -630,12 +770,52 @@ struct ContentView: View {
 
     // MARK: - Actions
 
+    private func saveSession() {
+        let mediaName = model.mediaURL
+            .map { $0.deletingPathExtension().lastPathComponent } ?? ""
+        let session = SavedSession(
+            createdAt: Date(),
+            mediaURL: model.mediaURL,
+            mediaName: mediaName,
+            segments: model.segments,
+            starred: Array(starred),
+            processedOutput: processing.output,
+            promptText: promptText
+        )
+        sessions.save(session)
+        savedSignature = currentSignature
+        toast("Session saved")
+        sessionSaved = true
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            sessionSaved = false
+        }
+    }
+
+    private func loadSession(_ session: SavedSession) {
+        processing.reset()
+        tab = .original
+        selectedSegmentID = nil
+        starToast = nil
+        clearSearch()
+        starred = Set(session.starred)
+        promptText = session.promptText
+        processing.output = session.processedOutput
+        let mediaURL: URL? = session.mediaURL.flatMap { url in
+            FileManager.default.fileExists(atPath: url.path) ? url : nil
+        }
+        model.restore(segments: session.segments, mediaURL: mediaURL)
+        savedSignature = currentSignature
+    }
+
     private func startTranscription(_ source: MediaSource) {
         processing.reset()
         tab = .original
         selectedSegmentID = nil
         starred.removeAll()
         starToast = nil
+        clearSearch()
+        savedSignature = nil
         model.start(source)
     }
 
@@ -648,6 +828,18 @@ struct ContentView: View {
             processing.cancel()
             processing.errorMessage = error.localizedDescription
         }
+    }
+
+    private func copyProcessedAndOriginal() {
+        let combined = """
+        \(processing.output)
+
+        Stemming from this original transcript from a video:
+        \(model.transcript)
+        """
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(combined, forType: .string)
+        toast("Copied processed + transcript")
     }
 
     private func copyActiveText() {

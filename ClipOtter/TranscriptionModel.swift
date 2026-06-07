@@ -54,6 +54,19 @@ final class TranscriptionModel {
         task = Task { await run(source) }
     }
 
+    func restore(segments: [TranscriptSegment], mediaURL: URL?) {
+        cancel()
+        if let old = retainedTemp {
+            try? FileManager.default.removeItem(at: old)
+            retainedTemp = nil
+        }
+        self.segments = segments
+        self.mediaURL = mediaURL
+        self.errorMessage = nil
+        self.status = "Session restored. 🦦"
+        self.isRunning = false
+    }
+
     func cancel() {
         task?.cancel()
         task = nil
