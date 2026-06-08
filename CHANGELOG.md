@@ -6,6 +6,11 @@ notes and a card on the website changelog.
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-06-07
+
+- Saving a session now overrides the existing one for that video instead of leaving duplicate copies
+- Moved backend & API-key settings into the Prompt box, next to the model selector
+
 ## [0.7.0] - 2026-06-07
 
 - Renamed the app to ClipOtter 🦦
