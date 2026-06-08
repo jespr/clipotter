@@ -39,6 +39,13 @@ final class SessionStore {
         try? fm.moveItem(at: legacy, to: directory)
     }
 
+    /// An already-saved session for the same media file, if one exists.
+    /// Used so re-saving the same video overrides its session instead of duplicating it.
+    func session(forMediaURL url: URL?) -> SavedSession? {
+        guard let url else { return nil }
+        return sessions.first { $0.mediaURL == url }
+    }
+
     func save(_ session: SavedSession) {
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let url = directory.appendingPathComponent("\(session.id.uuidString).json")

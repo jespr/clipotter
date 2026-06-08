@@ -34,6 +34,9 @@ struct ContentView: View {
     /// Signature of the last saved/loaded state; compared against `currentSignature`
     /// to know whether there are unsaved changes. `nil` means never saved this session.
     @State private var savedSignature: Int?
+    /// The session this transcript belongs to, if it was loaded from or already saved
+    /// to one. Lets re-saving override the same entry instead of writing a new copy.
+    @State private var currentSessionID: UUID?
     @State private var starToast: String?
     @State private var statusTick = 0
     @State private var searchText = ""
@@ -77,7 +80,6 @@ struct ContentView: View {
         .sheet(isPresented: $showSessions) {
             SessionsSheet(store: sessions, onLoad: loadSession)
         }
-        .popover(isPresented: $showSettings, arrowEdge: .top) { settingsPopover }
         .alert("Save prompt", isPresented: $showSavePrompt) {
             TextField("Name", text: $newPromptName)
             Button("Save") {
@@ -183,8 +185,11 @@ struct ContentView: View {
                 Button {
                     saveSession()
                 } label: {
-                    Label(sessionSaved ? "Saved" : "Save session",
-                          systemImage: sessionSaved ? "checkmark" : "bookmark")
+                    if sessionSaved {
+                        Label("Saved", systemImage: "checkmark")
+                    } else {
+                        Text("Save session")
+                    }
                 }
                 .help("Save session — restore transcript, stars, and processed output later")
             }
@@ -194,12 +199,6 @@ struct ContentView: View {
                 Image(systemName: "clock.arrow.circlepath")
             }
             .help("Saved sessions")
-            Button {
-                showSettings = true
-            } label: {
-                Image(systemName: "gearshape")
-            }
-            .help("Backend & Claude API key")
         }
     }
 
@@ -294,6 +293,16 @@ struct ContentView: View {
 
             HStack {
                 SegmentedPills(selection: $settings.backend, options: LLMBackendKind.allCases.map { ($0.label, $0) })
+
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help("Backend & Claude API key")
+                .popover(isPresented: $showSettings, arrowEdge: .bottom) { settingsPopover }
 
                 if backendHint != nil {
                     Button {
@@ -773,7 +782,11 @@ struct ContentView: View {
     private func saveSession() {
         let mediaName = model.mediaURL
             .map { $0.deletingPathExtension().lastPathComponent } ?? ""
+        // Override an existing session for the same video (or the one we loaded from)
+        // rather than writing a fresh copy each time.
+        let existingID = sessions.session(forMediaURL: model.mediaURL)?.id ?? currentSessionID
         let session = SavedSession(
+            id: existingID ?? UUID(),
             createdAt: Date(),
             mediaURL: model.mediaURL,
             mediaName: mediaName,
@@ -783,6 +796,7 @@ struct ContentView: View {
             promptText: promptText
         )
         sessions.save(session)
+        currentSessionID = session.id
         savedSignature = currentSignature
         toast("Session saved")
         sessionSaved = true
@@ -805,6 +819,7 @@ struct ContentView: View {
             FileManager.default.fileExists(atPath: url.path) ? url : nil
         }
         model.restore(segments: session.segments, mediaURL: mediaURL)
+        currentSessionID = session.id
         savedSignature = currentSignature
     }
 
@@ -815,6 +830,7 @@ struct ContentView: View {
         starred.removeAll()
         starToast = nil
         clearSearch()
+        currentSessionID = nil
         savedSignature = nil
         model.start(source)
     }
