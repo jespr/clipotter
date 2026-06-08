@@ -3,6 +3,20 @@
   <channel>
     <title>ClipOtter</title>
     <item>
+      <title>Version 0.7.1</title>
+      <sparkle:version>0.7.1</sparkle:version>
+      <sparkle:shortVersionString>0.7.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <pubDate>Mon, 08 Jun 2026 04:11:18 +0000</pubDate>
+      <description><![CDATA[<ul><li>Saving a session now overrides the existing one for that video instead of leaving duplicate copies</li><li>Moved backend & API-key settings into the Prompt box, next to the model selector</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/jespr/clipotter/releases/download/v0.7.1/ClipOtter.dmg"
+        sparkle:edSignature="+MxroyXXZqOWlQ0U5Y4gCVcbI95AOqkTAAgfKCVZlixlYAvhA/76V1kMY5rF70wfb24SZaLQxJs6ptuBF1/mDQ=="
+        length="5020665"
+        type="application/octet-stream"
+      />
+    </item>
+    <item>
       <title>Version 0.7.0</title>
       <sparkle:version>0.7.0</sparkle:version>
       <sparkle:shortVersionString>0.7.0</sparkle:shortVersionString>
